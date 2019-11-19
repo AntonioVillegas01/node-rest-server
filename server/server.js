@@ -1,5 +1,6 @@
 require('./config/config');
 const express = require('express');
+const mongoose = require('mongoose');
 const app = express();
 const bodyParser = require('body-parser');
 
@@ -10,39 +11,47 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
-app.get('/usuario', function (req, res) {
-    res.json('get usuario')
+app.use( require ('./routes/usuario'));
+
+
+
+//Conexion a MongoDB
+mongoose.Promise = Promise;
+
+mongoose.connection.on('connected', () => {
+    console.log('Base de Datos ONLINE!!')
 });
 
-app.post('/usuario', function (req, res) {
-
-    let body = req.body;
-
-    if (body.nombre === undefined)  {
-        res.status(400).json({
-            ok: false,
-            mensaje: 'El nombre es necesario'
-        });
-    }else {
-        res.json({
-            persona : body
-        })
-    }
-
-
+mongoose.connection.on('reconnected', () => {
+    console.log('Connection Reestablished')
 });
 
-app.put('/usuario/:id', function (req, res) {
+mongoose.connection.on('disconnected', () => {
+    console.log('Connection Disconnected')
+});
 
-    let id = req.params.id;
-    res.json({
-        id
+mongoose.connection.on('close', () => {
+    console.log('Connection Closed')
+});
+
+mongoose.connection.on('error', (error) => {
+    console.log('ERROR: ' + error)
+});
+const run = async () => {
+    await mongoose.connect(process.env.URLDB, {
+        useUnifiedTopology: true,
+        useNewUrlParser: true,
+        useCreateIndex: true,
+        autoReconnect: true,
+        reconnectTries: 1000000,
+        reconnectInterval: 3000
     })
-});
+};
 
-app.delete('/usuario', function (req, res) {
-    res.json('delete usuario')
-});
+run().catch(error => console.error(error));
+
+
+
 
 app.listen(process.env.PORT,()=>{
     console.log(`Escuchando en el puerto ${process.env.PORT}`)
