@@ -8,7 +8,8 @@
   },
   "scripts": {
     "start": "node server/server",
-    "nodemon": "nodemon server/server",
+    "dev": "nodemon server/server",
+    "mongo": "sudo mongod --dbpath=/Users/villegas/data/db",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
